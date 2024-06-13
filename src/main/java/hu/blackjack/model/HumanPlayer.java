@@ -2,12 +2,16 @@ package hu.blackjack.model;
 
 import java.util.List;
 
+import static hu.blackjack.model.PlayerStatus.SKIPPED;
 import static hu.blackjack.model.PlayerStatus.SURRENDERED;
 
 public class HumanPlayer extends AbstractPlayer{
 
+    private int budget;
+
     public HumanPlayer(String name) {
         super(name);
+        this.budget = 50;
     }
 
     @Override
@@ -34,4 +38,29 @@ public class HumanPlayer extends AbstractPlayer{
         }
     }
 
+    public void createHand(int bet){
+        if(bet < 0) {
+            throw new IllegalArgumentException("Bet cannot be negative!");
+        }
+        if(bet > budget){
+            throw new IllegalArgumentException("Bet (" + bet +") cannot be greater than player budget (" + budget + ")");
+        }
+        if(bet != 0) {
+            hand = new Hand(bet);
+            budget -= bet;
+        } else {
+            status = SKIPPED;
+        }
+    }
+
+    public void collectReward(double multiplier){
+       if(status != SKIPPED){
+           budget += hand.getBet() * multiplier;
+           hand = null;
+       }
+    }
+
+    public int getBudget(){
+        return budget;
+    }
 }

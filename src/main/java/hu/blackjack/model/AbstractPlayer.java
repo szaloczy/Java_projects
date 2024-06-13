@@ -10,7 +10,7 @@ public abstract class AbstractPlayer {
 
     private final String name;
     protected PlayerStatus status = PLAYING;
-    protected Hand hand = new Hand();
+    protected Hand hand;
 
     public AbstractPlayer(String name){
         this.name = name;
@@ -42,6 +42,9 @@ public abstract class AbstractPlayer {
 
     @Override
     public String toString() {
+        if(status == SKIPPED){
+            return name + " skipped";
+        }
         return name + ": " + hand;
     }
 

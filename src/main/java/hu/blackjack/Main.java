@@ -13,12 +13,33 @@ public class Main {
         Dealer dealer = new Dealer();
         List<HumanPlayer> players = List.of(new HumanPlayer("Player1"), new HumanPlayer("Player2"));
 
+
+       try (Scanner scanner = new Scanner(System.in)){
+        //Betting
+           System.out.println("Please make your bets!");
+           System.out.println("(place 0 bet, if you would like to skip this round)");
+        for (HumanPlayer player : players) {
+            while(true){
+               try {
+                   System.out.printf("%s's bet (1 - %d): ",player.getName(), player.getBudget());
+                   String userInput = scanner.nextLine();
+                   player.createHand(Integer.parseInt(userInput));
+                   break;
+               } catch (NumberFormatException e){
+                   System.out.println("Invalid input, please try again!");
+               } catch (IllegalArgumentException e){
+                   System.out.println(e.getMessage());
+               }
+           }
+        }
+        
+        //Setup of first round of cards
         List<AbstractPlayer> firstRoundOfDraws = new ArrayList<>(players);
         firstRoundOfDraws.add(dealer);
         firstRoundOfDraws.addAll(players);
         drawAllPlayers(deck, firstRoundOfDraws);
 
-       try (Scanner scanner = new Scanner(System.in)){
+        //Next round, each player draws
            for(HumanPlayer player : players){
                System.out.println(player);
                while(player.getStatus() == PlayerStatus.PLAYING) {
@@ -48,17 +69,18 @@ public class Main {
 
             //Evaluate player hands
             for (HumanPlayer player : players) {
-                String message = switch (player.getStatus()){
-                    case BUSTED ->  player.getName() + " busted and lost ";
-                    case SURRENDERED ->  player.getName() + " surrendered";
+                RoundResults results = switch (player.getStatus()){
+                    case BUSTED -> new RoundResults(player.getName() + " busted and lost", 0);
+                    case SURRENDERED -> new RoundResults(player.getName() + " surrendered", 0.5);
                     case BLACKJACK ->  handlePlayerBlackJack(player, dealer);
                     case STANDING -> handlePlayerStanding(player, dealer);
                     case PLAYING -> throw new IllegalStateException(player.getName() + " + should not be in + " + player.getStatus() + " status");
+                    case SKIPPED -> new RoundResults(player.getName() + " skipped this round", 0);
                 };
-                System.out.println(message);
+                player.collectReward(results.multiplier());
+                System.out.println(results.message());
+                System.out.println(player.getName() + "'s budget :" + player.getBudget());
             }
-
-
     }
 
     private static boolean isAnyPlayerIn(List<HumanPlayer> players, Set<PlayerStatus> desiredStatuses) {
@@ -70,28 +92,28 @@ public class Main {
         return false;
     }
 
-    private static String handlePlayerStanding(HumanPlayer player, Dealer dealer) {
+    private static RoundResults handlePlayerStanding(HumanPlayer player, Dealer dealer) {
          String playerName = player.getName();
          String dealerName = dealer.getName();
         if(dealer.getStatus() == PlayerStatus.BUSTED){
-           return playerName + " won, because " + dealerName + " busted";
+           return new RoundResults(playerName + " won, because " + dealerName + " busted", 2);
         }
         if(dealer.getHandValue() > player.getHandValue()){
-           return playerName + " lost to " + dealerName + " by having less points";
+           return new RoundResults(playerName + " lost to " + dealerName + " by having less points", 0);
         } else if(dealer.getHandValue() == player.getHandValue()) {
-            return playerName + " is in tie with " + dealerName;
+            return new RoundResults(playerName + " is in tie with " + dealerName, 1);
         } else {
-           return playerName + " won";
+           return new RoundResults(playerName + " won", 2);
         }
 
     }
 
-    private static String handlePlayerBlackJack(HumanPlayer player, Dealer dealer) {
+    private static RoundResults handlePlayerBlackJack(HumanPlayer player, Dealer dealer) {
         final String playerName = player.getName();
         if(dealer.getStatus() == PlayerStatus.BLACKJACK) {
-           return playerName + " lost, bacause " + dealer.getName() +" has BLACKJACK too";
+           return new RoundResults(playerName + " lost, bacause " + dealer.getName() +" has BLACKJACK too", 0);
         } else {
-            return playerName + " won with BLACKJACK";
+            return new RoundResults(playerName + " won with BLACKJACK", 2.5);
         }
     }
 
@@ -114,7 +136,9 @@ public class Main {
 
     private static void drawAllPlayers(List<Card> deck, List<AbstractPlayer> players) {
         for (AbstractPlayer player : players) {
-            player.draw(deck);
+           if(player.getStatus() == PlayerStatus.PLAYING){
+               player.draw(deck);
+           }
         }
     }
 

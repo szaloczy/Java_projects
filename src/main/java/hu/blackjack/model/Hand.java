@@ -7,6 +7,11 @@ public class Hand {
 
     public static final int BLACK_JACK_VALUE = 21;
     private final List<Card> cards = new ArrayList<>();
+    private int bet;
+
+    public Hand(int bet){
+        this.bet = bet;
+    }
 
     public void addCard(Card card){
         cards.add(card);
@@ -35,10 +40,21 @@ public class Hand {
 
     @Override
     public String toString() {
-        return cards +" (" + getValue() + ") ";
+        int value = getValue();
+        String valueAsString;
+        if(value == BLACK_JACK_VALUE && cards.size() == 2){
+            valueAsString = "BLACKJACK";
+        }else {
+            valueAsString = Integer.toString(value);
+        }
+        return cards +" (" + valueAsString + ") ";
     }
 
     public int getNumberOfCards() {
         return cards.size();
+    }
+
+    public int getBet() {
+        return bet;
     }
 }
