@@ -1,4 +1,7 @@
-package hu.blackjack.model;
+package hu.blackjack.model.players;
+
+import hu.blackjack.model.cards.Card;
+import hu.blackjack.model.cards.Rank;
 
 import java.util.ArrayList;
 import java.util.List;

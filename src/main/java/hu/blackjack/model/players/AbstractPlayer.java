@@ -1,10 +1,13 @@
-package hu.blackjack.model;
+package hu.blackjack.model.players;
+
+import hu.blackjack.model.cards.Card;
+import hu.blackjack.model.cards.Deck;
 
 import java.util.List;
 
-import static hu.blackjack.model.Hand.BLACK_JACK_VALUE;
-import static hu.blackjack.model.PlayerStatus.*;
-import static hu.blackjack.model.PlayerStatus.STANDING;
+import static hu.blackjack.model.players.Hand.BLACK_JACK_VALUE;
+import static hu.blackjack.model.players.PlayerStatus.*;
+import static hu.blackjack.model.players.PlayerStatus.STANDING;
 
 public abstract class AbstractPlayer {
 
@@ -22,11 +25,11 @@ public abstract class AbstractPlayer {
 
     public PlayerStatus getStatus(){ return status; }
 
-    public void draw(List<Card> deck){
+    public void draw(Deck deck){
         if(status != PLAYING){
             throw new IllegalStateException("Cannot throw in "+ status + " status!");
         }
-        hand.addCard(deck.remove(0));
+        hand.addCard(deck.getCard());
         int value = hand.getValue();
         if(value > BLACK_JACK_VALUE){
             status = BUSTED;
@@ -50,7 +53,7 @@ public abstract class AbstractPlayer {
 
     public abstract  List<Action> getAvailableActions();
 
-    public abstract void apply(Action action, List<Card> deck);
+    public abstract void apply(Action action, Deck deck);
 
     public int getHandValue() {
         return hand.getValue();

@@ -1,4 +1,4 @@
-package hu.blackjack.model;
+package hu.blackjack.model.cards;
 
 public enum Rank {
 

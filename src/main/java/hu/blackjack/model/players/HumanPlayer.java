@@ -1,9 +1,11 @@
-package hu.blackjack.model;
+package hu.blackjack.model.players;
+
+import hu.blackjack.model.cards.Card;
+import hu.blackjack.model.cards.Deck;
 
 import java.util.List;
 
-import static hu.blackjack.model.PlayerStatus.SKIPPED;
-import static hu.blackjack.model.PlayerStatus.SURRENDERED;
+import static hu.blackjack.model.players.PlayerStatus.*;
 
 public class HumanPlayer extends AbstractPlayer{
 
@@ -27,7 +29,7 @@ public class HumanPlayer extends AbstractPlayer{
     }
 
     @Override
-    public void apply(Action action, List<Card> deck) {
+    public void apply(Action action, Deck deck) {
         if(status != PlayerStatus.PLAYING){
             throw new IllegalStateException("No actions should be apply in" + status + " status!");
         }
@@ -48,6 +50,7 @@ public class HumanPlayer extends AbstractPlayer{
         if(bet != 0) {
             hand = new Hand(bet);
             budget -= bet;
+            status = PLAYING;
         } else {
             status = SKIPPED;
         }

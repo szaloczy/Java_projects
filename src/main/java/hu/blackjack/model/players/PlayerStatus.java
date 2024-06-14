@@ -1,4 +1,4 @@
-package hu.blackjack.model;
+package hu.blackjack.model.players;
 
 public enum PlayerStatus {
 
