@@ -51,11 +51,11 @@ public abstract class AbstractPlayer {
         return name + ": " + hand;
     }
 
-    public abstract  List<Action> getAvailableActions();
-
-    public abstract void apply(Action action, Deck deck);
-
     public int getHandValue() {
         return hand.getValue();
     };
+
+    public Hand getHand() {
+        return hand;
+    }
 }

@@ -1,9 +1,6 @@
 package hu.blackjack.model.players;
 
-import hu.blackjack.model.cards.Card;
 import hu.blackjack.model.cards.Deck;
-
-import java.util.List;
 
 import static hu.blackjack.model.players.PlayerStatus.*;
 
@@ -16,27 +13,12 @@ public class HumanPlayer extends AbstractPlayer{
         this.budget = 50;
     }
 
-    @Override
-    public List<Action> getAvailableActions() {
-        if(status != PlayerStatus.PLAYING){
-            throw new IllegalStateException("There are no actions in" + status + " status!");
-        }
-        if(hand.getNumberOfCards() == 2){
-            return List.of(Action.HIT, Action.STAND, Action.SURRENDER);
-        } else {
-            return List.of(Action.HIT, Action.STAND);
-        }
-    }
-
-    @Override
-    public void apply(Action action, Deck deck) {
-        if(status != PlayerStatus.PLAYING){
-            throw new IllegalStateException("No actions should be apply in" + status + " status!");
-        }
-        switch (action){
-            case HIT -> draw(deck);
-            case STAND -> status = PlayerStatus.STANDING;
-            case SURRENDER-> status = SURRENDERED;
+    public void executeDoubleAction(Deck deck) {
+        draw(deck);
+        budget -= hand.getBet();
+        hand.doubleBet();
+        if (status == PLAYING){
+            status = STANDING;
         }
     }
 
@@ -65,5 +47,11 @@ public class HumanPlayer extends AbstractPlayer{
 
     public int getBudget(){
         return budget;
+    }
+
+    public void setStatus(PlayerStatus playerStatus) {
+        if(status != PLAYING){
+            throw new IllegalStateException("Status can be set only for player in " + PLAYING + " status");
+        }
     }
 }

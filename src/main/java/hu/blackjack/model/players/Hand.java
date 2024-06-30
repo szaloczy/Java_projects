@@ -60,4 +60,12 @@ public class Hand {
     public int getBet() {
         return bet;
     }
+
+    public void doubleBet() {
+        bet *= 2;
+    }
+
+    public Card getCard(int index) {
+        return cards.get(index);
+    }
 }

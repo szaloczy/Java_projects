@@ -2,6 +2,7 @@ package hu.blackjack.model.players;
 
 import hu.blackjack.model.cards.Card;
 import hu.blackjack.model.cards.Deck;
+import hu.blackjack.model.cards.Rank;
 
 import java.util.List;
 
@@ -38,14 +39,12 @@ public class Dealer extends AbstractPlayer{
         }
     }
 
-    @Override
-    public List<Action> getAvailableActions() {
-        return List.of();
+    public void resetHand() {
+        hand = new Hand(0);
+        status = PLAYING;
     }
 
-    @Override
-    public void apply(Action action, Deck deck) {
-        throw new UnsupportedOperationException("The bank has internal decision making");
+    public boolean isFirstCardAce(){
+        return hand.getCard(0).rank() == Rank.ACE;
     }
-
 }

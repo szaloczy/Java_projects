@@ -6,12 +6,16 @@ import hu.blackjack.model.players.*;
 
 import java.util.*;
 
+import static hu.blackjack.model.players.PlayerStatus.SURRENDERED;
+
 public class Blackjack {
 
-    private Deck deck = new Deck(1);
-    private Dealer dealer = new Dealer();
-    private List<HumanPlayer> players = new ArrayList<>();
-    private Scanner scanner = new Scanner(System.in);
+    private static final List<Action> DEFAULT_ACTIONS = List.of(Action.HIT, Action.STAND);
+
+    private final Deck deck = new Deck(1);
+    private final Dealer dealer = new Dealer();
+    private final List<HumanPlayer> players = new ArrayList<>();
+    private final Scanner scanner = new Scanner(System.in);
 
     public void setup(){
 
@@ -93,6 +97,8 @@ public class Blackjack {
                 }
             }
         }
+
+        dealer.resetHand();
     }
 
     private void initialDraw() {
@@ -106,12 +112,12 @@ public class Blackjack {
         for(HumanPlayer player : players){
             System.out.println(player);
             while(player.getStatus() == PlayerStatus.PLAYING) {
-                List<Action> actions = player.getAvailableActions();
+                List<Action> actions = getPlayerActions(player);
                 System.out.print("Actions: " + getActionLabels(actions) + "? ");
                 String userInput = scanner.nextLine();
                 Optional<Action> selectedAction = findActionByCommand(actions, userInput);
                 if(selectedAction.isPresent()){
-                    player.apply(selectedAction.get(), deck);
+                    apply(player, selectedAction.get());
                     System.out.println(player);
                 } else {
                     System.out.println("Unknown Action commands");
@@ -144,6 +150,23 @@ public class Blackjack {
             System.out.println(results.message());
             System.out.println(player.getName() + "'s budget :" + player.getBudget());
         }
+    }
+
+    public List<Action> getPlayerActions(HumanPlayer player) {
+        if(player.getStatus() != PlayerStatus.PLAYING){
+            throw new IllegalStateException("There are no actions in" + player.getStatus() + " status!");
+        }
+        List<Action> actions = new ArrayList<>(DEFAULT_ACTIONS);
+        final Hand hand = player.getHand();
+        if(hand.getNumberOfCards() == 2){
+            actions.add(Action.SURRENDER);
+            if(player.getBudget() >= hand.getBet()) {
+                actions.add(Action.DOUBLE);
+            }
+            if(dealer.isFirstCardAce() && player.getBudget() > 0)
+                actions.add(Action.INSURANCE);
+        }
+        return actions;
     }
 
 
@@ -209,6 +232,21 @@ public class Blackjack {
            if(player.getStatus() == PlayerStatus.PLAYING){
                player.draw(deck);
            }
+        }
+    }
+
+
+    public void apply(HumanPlayer player, Action action) {
+        PlayerStatus status = player.getStatus();
+        if(status != PlayerStatus.PLAYING){
+            throw new IllegalStateException("No actions should be apply in" + status + " status!");
+        }
+        switch (action){
+            case HIT -> player.draw(deck);
+            case STAND ->player.setStatus(PlayerStatus.STANDING);
+            case SURRENDER-> player.setStatus(SURRENDERED);
+            case DOUBLE -> player.executeDoubleAction(deck);
+
         }
     }
 }
